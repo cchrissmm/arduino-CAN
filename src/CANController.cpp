@@ -95,6 +95,8 @@ int CANControllerClass::beginExtendedPacket(long id, int dlc, bool rtr)
 
 int CANControllerClass::endPacket()
 {
+  
+  //Serial.println(_txDlc);
   if (!_packetBegun) {
     return 0;
   }
@@ -103,8 +105,10 @@ int CANControllerClass::endPacket()
   if (_txDlc >= 0) {
     _txLength = _txDlc;
   }
+  //Serial.println(_txDlc);
 
   return 1;
+  
 }
 
 int CANControllerClass::parsePacket()
