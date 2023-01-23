@@ -4,8 +4,6 @@
 #ifndef CAN_H
 #define CAN_H
 
-#define ARDUINO_ARCH_ESP32
-
 #ifdef ARDUINO_ARCH_ESP32
 #include "ESP32SJA1000.h"
 #else
