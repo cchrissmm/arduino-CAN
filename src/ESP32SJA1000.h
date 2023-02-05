@@ -52,6 +52,8 @@ private:
 
   static void onInterrupt(void* arg);
 
+  int txErrorCounter();
+
 private:
   gpio_num_t _rxPin;
   gpio_num_t _txPin;

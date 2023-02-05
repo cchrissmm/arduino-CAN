@@ -35,13 +35,13 @@
 
 #define REG_CDR                    0x1F
 
+int tXerrorCounter = 0;
 
-ESP32SJA1000Class::ESP32SJA1000Class() :
-  CANControllerClass(),
-  _rxPin(DEFAULT_CAN_RX_PIN),
-  _txPin(DEFAULT_CAN_TX_PIN),
-  _loopback(false),
-  _intrHandle(NULL)
+ESP32SJA1000Class::ESP32SJA1000Class() : CANControllerClass(),
+                                         _rxPin(DEFAULT_CAN_RX_PIN),
+                                         _txPin(DEFAULT_CAN_TX_PIN),
+                                         _loopback(false),
+                                         _intrHandle(NULL)
 {
 }
 
@@ -246,10 +246,27 @@ int ESP32SJA1000Class::endPacket()
       return 0;
     }
     yield();
+    if (ESP32SJA1000Class::txErrorCounter()) {
+      return 0;
+    }
   }
 
   return 1;
 }
+
+int ESP32SJA1000Class::txErrorCounter()
+{
+  tXerrorCounter += 1;
+
+  if(tXerrorCounter > 5000) {
+    Serial.println("TX ErrorCounter = " + String(tXerrorCounter) + " is the CAN bus connected?");
+  tXerrorCounter = 0;
+  modifyRegister(REG_CMR, 0x1f, 0x02); // error, abort
+  return 1;
+  }
+  return 0;
+}
+
 
 int ESP32SJA1000Class::parsePacket()
 {
