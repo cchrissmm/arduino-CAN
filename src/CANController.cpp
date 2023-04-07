@@ -52,10 +52,12 @@ void CANControllerClass::end()
 int CANControllerClass::beginPacket(int id, int dlc, bool rtr)
 {
   if (id < 0 || id > 0x7FF) {
+    Serial.println("WARNING, CAN Driver: message id out of range (HEX): " + String(id, HEX));
     return 0;
   }
 
   if (dlc > 8) {
+    Serial.println("WARNING, CAN Driver: message dlc out of range: " + String(dlc));
     return 0;
   }
 
