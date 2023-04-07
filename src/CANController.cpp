@@ -100,6 +100,7 @@ int CANControllerClass::endPacket()
   
   //Serial.println(_txDlc);
   if (!_packetBegun) {
+    Serial.println("WARNING, CAN Driver: cant end packet as no packet was begun ");
     return 0;
   }
   _packetBegun = false;
