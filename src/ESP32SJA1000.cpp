@@ -259,7 +259,7 @@ int ESP32SJA1000Class::txErrorCounter()
   tXerrorCounter += 1;
 
   if(tXerrorCounter > 5000) {
-    Serial.println("TX ErrorCounter = " + String(tXerrorCounter) + " is the CAN bus connected?");
+    //Serial.println("TX ErrorCounter = " + String(tXerrorCounter) + " is the CAN bus connected?");
   tXerrorCounter = 0;
   modifyRegister(REG_CMR, 0x1f, 0x02); // error, abort
   return 1;
