@@ -11,6 +11,8 @@
 
 #include "ESP32SJA1000.h"
 
+#include <../../../../../src/debugger.h>  //Murphy: added for debugging
+
 #define REG_BASE                   0x3ff6b000
 
 #define REG_MOD                    0x00
@@ -69,8 +71,8 @@ int ESP32SJA1000Class::begin(long baudRate)
   gpio_pad_select_gpio(_txPin);
 
   modifyRegister(REG_CDR, 0x80, 0x80); // pelican mode
-  modifyRegister(REG_BTR0, 0xc0, 0x40); // SJW = 1
-  modifyRegister(REG_BTR1, 0x70, 0x10); // TSEG2 = 1
+  //modifyRegister(REG_BTR0, 0xc0, 0x40); // SJW = 1
+  //modifyRegister(REG_BTR1, 0x70, 0x10); // TSEG2 = 1
 
   esp_chip_info_t chip;
   esp_chip_info(&chip);
@@ -153,7 +155,7 @@ int ESP32SJA1000Class::begin(long baudRate)
 
   }
 
-  modifyRegister(REG_BTR1, 0x80, 0x80); // SAM = 1
+  //modifyRegister(REG_BTR1, 0x80, 0x80); // SAM = 1
   //writeRegister(REG_IER, 0xff); // enable all interrupts                                                    // 10.07.22:  Old line
   if (chip.revision >= 2 && baudRate >= 50E3)                                                                 //   "        New
        writeRegister(REG_IER, 0xef); // enable all interrupts, but clear bit 0x10 which is the new prescaler bit
@@ -200,7 +202,9 @@ void ESP32SJA1000Class::end()
 
 int ESP32SJA1000Class::endPacket()
 {
+  tXerrorCounter = 0;
   if (!CANControllerClass::endPacket()) {
+    dbgSend("CAN DBG_ERROR", "ESP32SJA1000Class::endPacket: no packet");
     return 0;
   }
 
@@ -236,17 +240,19 @@ int ESP32SJA1000Class::endPacket()
     modifyRegister(REG_CMR, 0x1f, 0x10);
   } else {
     // transmit request
-    modifyRegister(REG_CMR, 0x1f, 0x01);
+    modifyRegister(REG_CMR, 0x1f, 0x01); 
   }
 
   // wait for TX complete
   while ((readRegister(REG_SR) & 0x08) != 0x08) {
     if (readRegister(REG_ECC) == 0xd9) {
       modifyRegister(REG_CMR, 0x1f, 0x02); // error, abort
+      dbgSend("CAN DBG_ERROR", "ESP32SJA1000Class::endPacket: error, abort");
       return 0;
     }
     yield();
     if (ESP32SJA1000Class::txErrorCounter()) {
+      //dbgSend("CAN DBG_ERROR", "ESP32SJA1000Class::endPacket: TX ErrorCounter");
       return 0;
     }
   }
@@ -257,9 +263,11 @@ int ESP32SJA1000Class::endPacket()
 int ESP32SJA1000Class::txErrorCounter()
 {
   tXerrorCounter += 1;
+  dbgSend("CAN DBG TX ERROR COUNTER: ", String(tXerrorCounter));
 
-  if(tXerrorCounter > 5000) {
-    //Serial.println("TX ErrorCounter = " + String(tXerrorCounter) + " is the CAN bus connected?");
+  if(tXerrorCounter > 50) {
+    Serial.println("TX ErrorCounter = " + String(tXerrorCounter) + " is the CAN bus connected?");
+  dbgSend("CAN DBG_ERROR TX ErrorCounter counter too high. message aborted","");
   tXerrorCounter = 0;
   modifyRegister(REG_CMR, 0x1f, 0x02); // error, abort
   return 1;
