@@ -265,7 +265,7 @@ int ESP32SJA1000Class::txErrorCounter()
   tXerrorCounter += 1;
   dbgSend("CAN DBG TX ERROR COUNTER: ", String(tXerrorCounter));
 
-  if(tXerrorCounter > 50) {
+  if(tXerrorCounter > 500) {
     Serial.println("TX ErrorCounter = " + String(tXerrorCounter) + " is the CAN bus connected?");
   dbgSend("CAN DBG_ERROR TX ErrorCounter counter too high. message aborted","");
   tXerrorCounter = 0;
