@@ -71,8 +71,8 @@ int ESP32SJA1000Class::begin(long baudRate)
   gpio_pad_select_gpio(_txPin);
 
   modifyRegister(REG_CDR, 0x80, 0x80); // pelican mode
-  //modifyRegister(REG_BTR0, 0xc0, 0x40); // SJW = 1
-  //modifyRegister(REG_BTR1, 0x70, 0x10); // TSEG2 = 1
+  modifyRegister(REG_BTR0, 0xc0, 0x40); // SJW = 1
+  modifyRegister(REG_BTR1, 0x70, 0x10); // TSEG2 = 1
 
   esp_chip_info_t chip;
   esp_chip_info(&chip);
@@ -155,7 +155,7 @@ int ESP32SJA1000Class::begin(long baudRate)
 
   }
 
-  //modifyRegister(REG_BTR1, 0x80, 0x80); // SAM = 1
+  modifyRegister(REG_BTR1, 0x80, 0x80); // SAM = 1
   //writeRegister(REG_IER, 0xff); // enable all interrupts                                                    // 10.07.22:  Old line
   if (chip.revision >= 2 && baudRate >= 50E3)                                                                 //   "        New
        writeRegister(REG_IER, 0xef); // enable all interrupts, but clear bit 0x10 which is the new prescaler bit
